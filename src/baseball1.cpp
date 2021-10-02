@@ -1,5 +1,5 @@
 ///
-/// Start e templated for first baseball problem
+/// Starter templated for first baseball problem
 ///
 
 

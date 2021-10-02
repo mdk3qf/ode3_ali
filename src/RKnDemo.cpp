@@ -153,7 +153,12 @@ int main(int argc, char **argv){
   double x=0;           // t0
   double xmax=20;  // tmax
   int nsteps=200;
+  // fixed step size algorithm
   auto tgN = RK4SolveN(v_fun, y, nsteps, x, xmax, p_par, f_stop);
+  // example of variable step algorithm, here the estimate accuracy is limited to 1e-4
+  // in the plot you will see the change in step size thoughout the time interval
+  //auto tgN = RK4SolveNA(v_fun, y, nsteps, x, xmax, p_par, f_stop,1e-4);
+  
   TCanvas *c2 = new TCanvas("c2","ODE solutions 2",dw,dh);
   tgN[2].Draw("al*");
   c2->Draw();
