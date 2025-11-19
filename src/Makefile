@@ -11,7 +11,7 @@ CXXFLAGS  += $(ROOTCFLAGS) -I$(ODELIB) -Wall -O3
 LDFLAGS    = $(ROOTLIBS) $(ROOTGLIBS) -Wl,-rpath,$(ODELIB) -L$(ODELIB) -lode
 GSLFLAGS   = -lgsl -lgslcblas
 GXX	   = g++ $(CXXFLAGS)
-
+ODELIB = /sfs/gpfs/tardis/home/mdk3qf/compphys/ode3_ali/odelib
 
 EXES=baseball1 baseball2 RKnDemo RKnStep RKnTest projGSL
 

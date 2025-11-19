@@ -59,7 +59,7 @@ tc.cd(3)
 tg_v_vs_t.Draw("a*")
 
 tc.Update()  # makes sure image on screen is up to date w/ all plot changes
-tc.Print("Projectile.png") # or use Projectile.png, etc. to save your canvas
+tc.Print("Projectile.pdf") # or use Projectile.png, etc. to save your canvas
 
 
 # note: if you would rather manipulate the data using something
