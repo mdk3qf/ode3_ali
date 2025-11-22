@@ -27,7 +27,7 @@ RKnStep: RKnStep.cpp $(ODELIB)/RKn.hpp
 RKnTest: RKnTest.cpp $(ODELIB)/RKn.hpp 
 	$(GXX) $(CXXFLAGS) -o$@ $@.cpp $(LDFLAGS)
 
-baseball1: baseball1.cpp $(ODELIB)/RKn.hpp 
+baseball1_tmp: baseball1.cpp $(ODELIB)/RKn.hpp 
 	$(GXX) $(CXXFLAGS) -o$@ $@.cpp $(LDFLAGS) 
 
 baseball2: baseball2.cpp $(ODELIB)/RKn.hpp 

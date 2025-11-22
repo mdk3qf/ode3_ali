@@ -12,7 +12,7 @@ def hit_terminal(t, y):
     vx = y[1]
     vy = y[3]
     v = sqrt(vx*vx + vy*vy)
-    drag = air_k * v * abs(v)
+    drag = air_k*v*abs(v)
     # Trigger when drag is within threshold of weight
     return abs(drag - y[4]*g) - 1e-4
 hit_terminal.terminal = True
@@ -25,10 +25,10 @@ def func(t,y):
     v  = sqrt(vx*vx + vy*vy)
 
     f0 = vx
-    f1 = -air_k*v*vx / m
+    f1 = -air_k*v*vx/m
     f2 = vy
-    f3 = -air_k*v*vy / m - g
-    f4 = 0.0                     # mass constant
+    f3 = -air_k*v*vy/m - g
+    f4 = 0.0                     # mass
     return [f0,f1,f2,f3,f4]
 
 def compute_vt(mass):
