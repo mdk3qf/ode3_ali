@@ -31,7 +31,7 @@ int main(int argc, char **argv){
   // y[5] = v0*sin(theta0);   // vz  "z" is vertival measure
   vector<double> y0(6);
 
-  bool showPlot=false;
+  bool showPlot=true;
   // pitches
   // slider ip=0
   // curve ip=1
@@ -86,7 +86,7 @@ int main(int argc, char **argv){
       // F_mag_z =  -m * B * ω * (vx * sin φ)
       // F_drag_i =  -m * F * v *v_i
   
-    // For a baseball approximate:
+  // For a baseball, approximate:
       // B = S/m = 4.1×10−4
       // F = 0.0039 + (0.0058)/[1+exp(0.2(v-35))]
 
@@ -98,47 +98,45 @@ int main(int argc, char **argv){
     double phi;    // spin axis angle relative to z axis [rad]
   };
 
-  Params pars; // SI units
+  Params pars;
   pars.g = 9.81;  
   pars.B = 4.1e-4;
   
   double v0, omega_rpm, phi;
 
-  // pitch parameters
+  // pitch parameters, matching the textbook's values
   if (ip == 0) {              // Slider
       v0 = 38.0;              // m/s  (≈85 mph)
-      omega_rpm = 1700.0;
+      omega_rpm = 1800.0;
       phi = 0.0;              // spin axis along z
   }
   else if (ip == 1) {         // Curveball
-      v0 = 33.5;              // m/s  (≈75 mph)
-      omega_rpm = 2000.0;
+      v0 = 38.0;              // m/s  (≈85 mph)
+      omega_rpm = 1800.0;
       phi = M_PI/4.0;         // spin axis 45 degrees from z
   }
   else if (ip == 2) {         // Screwball
-      v0 = 31.3;              // m/s
+      v0 = 38.0;              // m/s
       omega_rpm = 1800.0;
       phi = 3.0 * M_PI/4.0;   // spin axis 135 degrees from z
   }
   else {                      // Fastball
-      v0 = 40.2;              // m/s (≈90 mph)
-      omega_rpm = 1500.0;
-      phi = M_PI/2.0;         // spin axis 90 degrees from z
+      v0 = 42.5;              // m/s (≈95 mph)
+      omega_rpm = 1800.0;
+      phi = 5.0 * M_PI/4.0;   // spin axis 225 degrees from z
   }
 
-  // convert rpm to rad/s
-  pars.omega = omega_rpm * 2.0 * M_PI / 60.0;
-  
-  // set spin axis angle in pars
+  // now put the pitch parameters into the pars struct
+  pars.omega = omega_rpm * 2.0 * M_PI / 60.0; // convert rpm to rad/s
   pars.phi = phi;
   
   // Initial conditions
-  double theta = 0.0;               // release angle
+  double theta = 0.017;             // release angle
   y0[0] = 0.0;                      // x0
   y0[1] = v0 * cos(theta);          // vx0
   y0[2] = 0.0;                      // y0
   y0[3] = 0.0;                      // vy0
-  y0[4] = 1.8;                      // z0 (6 feet in meters)
+  y0[4] = 0.0;                      // z0 (6 feet in meters)
   y0[5] = v0 * sin(theta);          // vz0
   
   void *p_par = (void*)&pars;
@@ -227,7 +225,6 @@ int main(int argc, char **argv){
     return 0;
   };
   
-  
   vector<pfunc_t> v_fun = {f_x, f_vx, f_y, f_vy, f_z, f_vz};
   
   pfunc_t stop_func = +f_stop;
@@ -235,12 +232,12 @@ int main(int argc, char **argv){
   // Now we have everything to solve the trajectory
   vector<double> y = y0;
   double t = 0.0;
-  double tmax = 4.0;  // seconds
-  int nsteps = 2000;
+  double tmax = 1.0;  // seconds
+  int nsteps = 1000;
   
   auto tgN = RK4SolveN(v_fun, y, nsteps, t, tmax, p_par, stop_func);
   
-  // Extract final values and convert to feet
+  // Extract final values and convert to feet for the print out at the end
   xend = y[0] * 3.28084;
   yend = y[2] * 3.28084;
   zend = y[4] * 3.28084;
@@ -248,6 +245,79 @@ int main(int argc, char **argv){
   vyend = y[3] * 3.28084;
   vzend = y[5] * 3.28084;
 
+
+  // PLOTTING
+  if (showPlot){
+    TCanvas *c1 = new TCanvas("c1", "Baseball Trajectories", 800, 600);
+    
+    const char* pitch_names[] = {"Slider", "Curveball", "Screwball", "Fastball"};
+    
+    for (int pitch_type = 0; pitch_type < 4; pitch_type++) {
+      
+      // Set parameters for this pitch type
+      if (pitch_type == 0) {
+          v0 = 38.0;
+          omega_rpm = 1800.0;
+          phi = 0.0;
+      } else if (pitch_type == 1) {
+          v0 = 38.0;
+          omega_rpm = 1800.0;
+          phi = M_PI/4.0;
+      } else if (pitch_type == 2) {
+          v0 = 38.0;
+          omega_rpm = 1800.0;
+          phi = 3.0 * M_PI/4.0;
+      } else {
+          v0 = 42.5;
+          omega_rpm = 1800.0;
+          phi = 5.0 * M_PI/4.0;
+      }
+      
+      pars.omega = omega_rpm * 2.0 * M_PI / 60.0;
+      pars.phi = phi;
+      
+      // Reset initial conditions
+      vector<double> y_temp = {0.0, v0*cos(theta), 0.0, 0.0, 0.0, v0*sin(theta)};
+      
+      // Solve trajectory
+      double t_temp = 0.0;
+      auto tgN_temp = RK4SolveN(v_fun, y_temp, nsteps, t_temp, tmax, p_par, stop_func);
+      
+      // Create graphs
+      TGraph *gr_z = new TGraph();
+      TGraph *gr_y = new TGraph();
+      
+      for (int i = 0; i < tgN_temp[0].GetN(); i++) {
+        double t_val, x_val, y_val, z_val;
+        tgN_temp[0].GetPoint(i, t_val, x_val);
+        tgN_temp[2].GetPoint(i, t_val, y_val);
+        tgN_temp[4].GetPoint(i, t_val, z_val);
+        
+        gr_z->SetPoint(i, x_val*3.28084, z_val*3.28084); // converting to ft
+        gr_y->SetPoint(i, x_val*3.28084, y_val*3.28084);
+      }
+      
+      gr_z->SetLineColor(kBlack);
+      gr_z->SetLineWidth(2);
+      gr_z->SetLineStyle(1);
+      gr_z->SetTitle(Form("%s; x [ft]; y [ft] / z [ft]", pitch_names[pitch_type]));
+      
+      gr_y->SetLineColor(kBlack);
+      gr_y->SetLineWidth(2);
+      gr_y->SetLineStyle(2);
+      
+      c1->Clear();
+      gr_z->Draw("AL");
+      gr_y->Draw("L same");
+      gr_z->SetMinimum(-4);
+      gr_z->SetMaximum(2);
+      c1->Update();
+      
+      if (pitch_type == 0) c1->Print("pitches.pdf(");
+      else if (pitch_type == 3) c1->Print("pitches.pdf)");
+      else c1->Print("pitches.pdf");
+    }
+  }
   // ---------------------------------------------------------------------------
 
 
