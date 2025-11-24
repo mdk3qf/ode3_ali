@@ -311,6 +311,13 @@ int main(int argc, char **argv){
       gr_y->Draw("L same");
       gr_z->SetMinimum(-4);
       gr_z->SetMaximum(2);
+
+      // make the legend smaller
+      TLegend *legend = new TLegend(0.125, 0.7, 0.2, 0.85); // left, bottom, right, top
+      legend->AddEntry(gr_z, "  z", "l");
+      legend->AddEntry(gr_y, "  y", "l");
+      legend->Draw();
+
       c1->Update();
       
       if (pitch_type == 0) c1->Print("pitches.pdf(");
